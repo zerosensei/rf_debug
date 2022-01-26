@@ -54,7 +54,7 @@ lwrb_t RF_SEND;
 uint8_t RF_SEND_BUFF[1024*6];
 
 lwrb_t RF_RCV;
-uint8_t RF_RCV_BUFF[1024*6];
+uint8_t RF_RCV_BUFF[1];
 
 lwrb_t RF_OTAbuff;
 uint8_t RF_OTAbuff_data[512];
@@ -135,6 +135,8 @@ void lwrb_set_evt_fn(LWRB_VOLATILE lwrb_t *buff, lwrb_evt_fn evt_fn)
  *                      When returned value is less than `btw`, there was no enough memory available
  *                      to copy full data array
  */
+
+__attribute__((section(".highcode")))
 size_t lwrb_write(LWRB_VOLATILE lwrb_t *buff, const void *data, size_t btw)
 {
     size_t tocopy, free;
@@ -232,6 +234,7 @@ size_t lwrb_read(LWRB_VOLATILE lwrb_t *buff, void *data, size_t btr)
  * \param[in]       btp: Number of bytes to peek
  * \return          Number of bytes peeked and written to output array
  */
+__attribute__((section(".highcode")))
 size_t lwrb_peek(LWRB_VOLATILE lwrb_t *buff, size_t skip_count, void *data, size_t btp)
 {
     size_t full, tocopy, r;
@@ -319,6 +322,8 @@ size_t lwrb_get_free(LWRB_VOLATILE lwrb_t *buff)
  * \param[in]       buff: Buffer handle
  * \return          Number of bytes ready to be read
  */
+
+//__attribute__((section(".highcode")))
 size_t lwrb_get_full(LWRB_VOLATILE lwrb_t *buff)
 {
     size_t w, r, size;
@@ -415,6 +420,7 @@ size_t lwrb_get_linear_block_read_length(LWRB_VOLATILE lwrb_t *buff)
  * \param[in]       len: Number of bytes to skip and mark as read
  * \return          Number of bytes skipped
  */
+__attribute__((section(".highcode")))
 size_t lwrb_skip(LWRB_VOLATILE lwrb_t *buff, size_t len)
 {
     size_t full;

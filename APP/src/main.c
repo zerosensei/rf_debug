@@ -55,9 +55,9 @@ __HIGH_CODE
 void testpirnt(void ){
     while(1){
         static uint32_t i = 0;
-        PRINT("this is test count = %d\n", i);
+//        PRINT("this is test count = %d\n", i);
         i++;
-        DelayMs(100);
+        DelayUs(100);
     }
 }
 
@@ -87,6 +87,8 @@ int main(void)
     UART1_DefInit();
 #endif
     DEBUG_Init();
+
+//    testpirnt();
 
     GPIOA_SetBits(GPIO_Pin_5);
     GPIOA_ModeCfg(GPIO_Pin_5, GPIO_ModeOut_PP_5mA);

@@ -1,7 +1,10 @@
 #include "uart.h"
 #include "CH58x_common.h"
 #include "RingBuffer/lwrb.h"
+#include "sys/atomic.h"
 
+
+ATOMIC_DEFINE(is_uart_timeout, 1);
 
 __attribute__((section(".highcode")))
 void UART0_IRQHandler(void)
@@ -20,6 +23,7 @@ void UART0_IRQHandler(void)
             }
 
             lwrb_write(&RF_SEND, rcv_buf, rcv_len);
+            atomic_set_bit_to(is_uart_timeout, 0, 0);
 
             break;
         case UART_II_RECV_TOUT:      //Ω” ’≥¨ ±
@@ -28,6 +32,7 @@ void UART0_IRQHandler(void)
                 rcv_buf[i] = R8_UART0_RBR;
             }
             lwrb_write(&RF_SEND, rcv_buf, rcv_len);
+            atomic_set_bit_to(is_uart_timeout, 0, 1);
 
             break;
 
@@ -79,6 +84,8 @@ void uart0_init(void)
     UART0_DefInit();
 
     UART0_BaudRateCfg( 921600 );
+
+    atomic_set_bit_to(is_uart_timeout, 0, 0);
 
     UART0_ByteTrigCfg( UART_4BYTE_TRIG );
     UART0_INTCfg( ENABLE, RB_IER_RECV_RDY | RB_IER_LINE_STAT);

@@ -7,12 +7,13 @@
 #include "RF_PHY/rf_process.h"
 #include "uart_task/uart_task.h"
 #include "USB_task/usb_task.h"
+#include "sys/atomic.h"
 
 tmosTaskID RFtaskID;
 #if (CONFIG_RF_MODE == 1)
 void tx_respond(uint8_t *buf, uint8_t len);
 void tx_send_failed(void);
-int rf_tx_deal(void);
+int rf_tx_deal(bool force);
 
 static uint8_t send_buf[200] = { 0 };
 static size_t send_len = 0;
@@ -64,36 +65,42 @@ void tx_send_failed(void)
 //    tmos_start_task(RFtaskID, RF_SEND_EVENT, MS1_TO_SYSTEM_TIME(1));
 }
 
+__attribute__((section(".highcode")))
 void tx_respond(uint8_t *buf, uint8_t len)
 {
     lwrb_skip(&RF_SEND, send_len);
-    PRINT("tx success\n");
+    LOG_INFO("tx success\n");
 }
 
-int rf_tx_deal(void)
+
+#define FULL_LEN        64   //虽然不知道为什么 但是改成64速度直接拉满而且不丢数据了
+
+__HIGH_CODE
+int rf_tx_deal(bool force)
 {
-    if (lwrb_get_full(&RF_SEND) == 0)
+    static bool is_set = false;
+
+    send_len = lwrb_get_full(&RF_SEND);
+    if(unlikely(send_len == 0))
         return -1;
 
-    struct rf_status_t *sta = get_rf_status();
-    PRINT("got sta = %#x\n", *sta);
+    if(send_len < FULL_LEN && !force){
+        if(is_set)
+            return -1;
 
-    if(sta->dongle_lost) {
-        PRINT("dongle lost, reset lwrb\n");
-        lwrb_reset(&RF_SEND);
+        is_set = true;
+        tmos_start_task(RFtaskID, RF_SEND_LATER_EVENT, MS1_TO_SYSTEM_TIME(10));  //921600 bps 10ms 1000 bytes
         return -1;
     }
+    is_set = false;
 
-     send_len = lwrb_get_full(&RF_SEND);
-    if(send_len >= BLE_BUFF_MAX_LEN - 7){
-        send_len = BLE_BUFF_MAX_LEN - 7;
-    }
+    send_len = min(send_len, FULL_LEN);
+
     lwrb_peek(&RF_SEND, 0, send_buf, send_len);
 
     rf_send((uint8_t *)&send_buf, send_len, false);
 
-
-    return send_len;
+    return 1;
 }
 #endif
 
@@ -140,16 +147,25 @@ uint16 RF_task_Event(uint8 task_id, uint16 events)
         return events ^ PAIR_EVENT;
     }
 
+    if (events & RF_SEND_LATER_EVENT) {
+        rf_tx_deal(true);
+
+        return events ^ RF_SEND_LATER_EVENT;
+    }
+
     if (events & RF_SEND_EVENT) {
 
-        if(rf_tx_deal() >0 ){
+        if(rf_tx_deal(false) > 0){
             tmos_start_task(RFtaskID, RF_SEND_EVENT, 0);
         } else {
-            tmos_start_task(RFtaskID, RF_SEND_EVENT, MS1_TO_SYSTEM_TIME(1));
+            tmos_start_task(RFtaskID, RF_SEND_EVENT, 2);
         }
+
         return events ^ RF_SEND_EVENT;
     }
-#endif
+
+
+#endif /* CONFIG_RF_MODE */
 
     return 0;
 }

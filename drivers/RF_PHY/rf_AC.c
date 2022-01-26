@@ -135,9 +135,9 @@ int rf_ACInit( rfConfig_t* cfg )
   autoenable = cfg->LLEMode & 1;
   RF_AC_DBG("autoenable = %d\n",autoenable);
 
-  PFIC_SetPriority(TMR0_IRQn, 0xf0);
-  PFIC_SetPriority(BLEB_IRQn, 0xf0);
-  PFIC_SetPriority(BLEL_IRQn, 0xf0);
+//  PFIC_SetPriority(TMR0_IRQn, 0xf0);
+//  PFIC_SetPriority(BLEB_IRQn, 0xf0);
+//  PFIC_SetPriority(BLEL_IRQn, 0xf0);
 #if(CONFIG_RF_MODE == RFTX)
   worksta = RFTX;
   rtctime = RTC_GetCycle32k()+32*TX_ONCETIME;

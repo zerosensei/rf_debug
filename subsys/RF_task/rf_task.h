@@ -12,6 +12,7 @@ extern "C"
 
 #define PAIR_EVENT                  0x0001
 #define RF_SEND_EVENT               0x0002
+#define RF_SEND_LATER_EVENT         0x0004
 
 #define RF_SLEEP_EVENT              0x0010
 #define RF_TEST_EVENT               0x0020   //rf测试事件，自动配对，然后每隔10ms发一次空包，即只发ID与包类型，数据段为空
