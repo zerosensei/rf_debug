@@ -83,7 +83,21 @@ void uart0_init(void)
 
     UART0_DefInit();
 
-    UART0_BaudRateCfg( 921600 );
+    GPIOB_ModeCfg(GPIO_Pin_17 | GPIO_Pin_16, GPIO_ModeIN_PU);
+
+    if(GPIOB_ReadPortPin(GPIO_Pin_16) == 0){
+        DelayMs(100);
+        if(GPIOB_ReadPortPin(GPIO_Pin_16) == 0){
+            UART0_BaudRateCfg( 115200 );
+        }
+    } else if (GPIOB_ReadPortPin(GPIO_Pin_17) == 0) {
+        DelayMs(100);
+        if(GPIOB_ReadPortPin(GPIO_Pin_17) == 0){
+            UART0_BaudRateCfg( 921600 );
+        }
+    } else{
+        UART0_BaudRateCfg( 115200 );
+    }
 
     atomic_set_bit_to(is_uart_timeout, 0, 0);
 
