@@ -44,6 +44,12 @@ void rf_read_deal(uint8_t *data, uint8_t len)
         PRINT("%#x", data[i]);
     }PRINT("]\n");
 
+    if(lwrb_get_free(&RF_RCV) < len) {
+        PRINT("ringbuffer overflow\n");
+
+        lwrb_reset(&RF_RCV);
+    }
+
     if(lwrb_write(&RF_RCV, data, len) == len);
         OnBoard_SendMsg(USBTaskID, KEY_MESSAGE, 1, NULL);
 

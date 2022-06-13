@@ -1139,6 +1139,6 @@ void USB_Init(void)
   USB_DeviceInit();
   LOG_INFO("USB Device Init");
   PFIC_EnableIRQ( USB_IRQn );
-  DelayMs(200);  //wait usb init
+  DelayMs(500);  //wait usb init
 }
 

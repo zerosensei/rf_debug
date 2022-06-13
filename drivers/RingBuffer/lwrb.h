@@ -132,7 +132,7 @@ void ring_buffer_init( void );
 extern lwrb_t RF_SEND;
 extern uint8_t RF_SEND_BUFF[1024*6];
 extern lwrb_t RF_RCV;
-extern uint8_t RF_RCV_BUFF[1];
+extern uint8_t RF_RCV_BUFF[1024*6];
 
 extern lwrb_t RF_OTAbuff;
 extern uint8_t RF_OTAbuff_data[512];

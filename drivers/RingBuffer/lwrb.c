@@ -54,7 +54,7 @@ lwrb_t RF_SEND;
 uint8_t RF_SEND_BUFF[1024*6];
 
 lwrb_t RF_RCV;
-uint8_t RF_RCV_BUFF[1];
+uint8_t RF_RCV_BUFF[1024*6];
 
 lwrb_t RF_OTAbuff;
 uint8_t RF_OTAbuff_data[512];
@@ -553,6 +553,7 @@ void ring_buffer_init( void )
 {
   lwrb_init(&RF_SEND, RF_SEND_BUFF, sizeof(RF_SEND_BUFF));
   lwrb_init(&RF_RCV, RF_RCV_BUFF, sizeof(RF_RCV_BUFF));
+  lwrb_set_evt_fn(&RF_RCV, my_buff_evt_fn);
 
   lwrb_reset(&RF_SEND);
   lwrb_reset(&RF_RCV);
